@@ -1,0 +1,103 @@
+#!/usr/bin/env bash
+
+# ============================== #
+# Bio-Informatics Shell Logger
+# ============================== #
+# During the "trial&error" phase of bioinformatics work one often runs shell
+# commands on small/test data straight from CLI taking advantage of Bash's REPL.
+# While this gets the job done and may seem more productive in the initial
+# stages, it makes creating a proper pipeline harder.
+#
+# This script is supposed to be the golden mean between relying on REPL and
+# structured scripts.
+# ============================== #
+
+get_help() {
+	case $1 in
+		finework)
+			echo chuj
+			;;
+		*)
+			echo '
+  Bio-Informatics Shell Logger is a script intended to mitigate the
+  flaws of quick and dirty REPL bioinformatics analysis.
+  
+  It runs a child instance of bash with separate rc file. It creates a
+  new history file with no size limit in the current directory.
+  
+  Commands:
+    get_help      get help (get_help command outputs verbose command specific help)
+    finework      saves last command into finework.sh
+			'
+			;;
+	esac
+}
+start_info() {
+	cat << EOF >&2
+Welcome to BISL, the Bio-Informatics Shell Logger.
+
+get_help to get help.
+
+Ctrl+D or exit to quit.
+EOF
+}
+
+export -f get_help start_info
+
+# ============================== #
+# Dir setup
+# ============================== #
+
+[[ ! -d .hist ]] && mkdir .hist/
+FILENAME="$(pwd)/.hist/$(date '+%y%m%d')$(( RANDOM % 100 )).bislhist"
+
+cat > .tmprc << EOF
+HISTCONTROL='ignoredups'
+HISTFILE=${FILENAME}
+HISTIGNORE="ls*:cd*"
+HISTSIZE=-1
+PS1=":-=[BISL SESSION]=-:\n[\u@\h \W]\n└─$ "
+
+#export PROMPT_COMMAND='
+#	cmd=\$(history 1 | sed "s/^ *[0-9]\+ *//");
+#		echo "\$cmd" >> "$LOGFILE";
+#'
+clear
+start_info
+EOF
+
+trap 'rm .tmprc' EXIT
+
+#PS1=":-=[BISL SESSION]=-:\n[\u@\h \W]\n└─$ "
+
+# ==================== #
+# Session start
+# ==================== #
+
+bash --rcfile .tmprc -i
+
+
+#--------------------------#
+# GPT sewage from this point!
+#--------------------------#
+#
+#
+#LOGDIR="${BIO_SHELL_LOG_DIR:-$HOME/.bio_shell_logs}"
+#mkdir -p "$LOGDIR"
+#
+## Timestamped log file
+#SESSION_ID="$(date +'%Y%m%d_%H%M%S')_$$"
+#LOGFILE="$LOGDIR/session_${SESSION_ID}.bash"
+#
+#echo "# Logging shell started: $SESSION_ID" > "$LOGFILE"
+#
+## Write commands to both history file and our log file
+#cat <<EOF > /tmp/bio_shell_rc
+#export HISTFILE=/dev/null             # prevent contaminating user .bash_history
+#export PROMPT_COMMAND='
+#  history -a;                         # append to HISTFILE (disabled here, but standard)
+#  cmd=$(history 1 | sed "s/^ *[0-9]\+ *//");
+#  echo "$cmd" >> "'"$LOGFILE"'";
+#'
+#echo "# BioShellLogger: logging to $LOGFILE"
+#EOF

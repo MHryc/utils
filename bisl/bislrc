@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+PS1=":-=[BISL SESSION]=-:\n[\u@\h \W]\n└─$ "
+
+HISTCONTROL='ignoredups'
+HISTFILE="$(pwd)/$(date '+%y%m%d')$(( RANDOM % 100 )).bislhist"
+HISTIGNORE="ls*:cd*"
+HISTSIZE=-1
+
+get_help() {
+	cat << EOF >&2
+Bash 
+
+Usage: exec bisl [options]
+exec [-cl] [-a name] [command [arguments]]
+EOF
+
+exit 0
+}
+
+start_info() {
+	cat << EOF >&2
+Welcome to BISL, the Bio-Informatics Shell Logger.
+
+Ctrl+D to quit
+EOF
+}
+
+# ==================== #
+# Session start
+# ==================== #
+
+clear
+start_info

@@ -39,9 +39,7 @@ while getopts ":hf:o:bc:x" flag; do
 done
 
 # create .tex directory if needed
-if [[ ! -d ".tex" ]]; then
-	mkdir .tex
-fi
+[[ ! -d .tex ]] && mkdir .tex
 
 # compile .tex into pdf with bibtex references
 if [[ $bibtex -eq 1 ]]; then
